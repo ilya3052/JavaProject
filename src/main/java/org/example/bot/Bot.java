@@ -10,10 +10,15 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Bot extends TelegramLongPollingBot {
+    private List<String> stringList;
+    private static String chatID;
+    private static String response;
     public Bot()
     {
+        stringList = new ArrayList<>();
         initKeyboard();
     }
 
@@ -33,8 +38,8 @@ public class Bot extends TelegramLongPollingBot {
         try {
             if (update.hasMessage() && update.getMessage().hasText()) {
                 Message message = update.getMessage();
-                String chatID = message.getChatId().toString();
-                String response = parseMessage(message.getText());
+                chatID = message.getChatId().toString();
+                response = parseMessage(message.getText().toLowerCase());
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setChatId(chatID);
                 sendMessage.setText(response);
@@ -52,20 +57,48 @@ public class Bot extends TelegramLongPollingBot {
         ArrayList<KeyboardRow> keyboardRows = new ArrayList<>();
         KeyboardRow keyboardRow = new KeyboardRow();
         keyboardRows.add(keyboardRow);
-        keyboardRow.add(new KeyboardButton("Просвяти"));
-        keyboardRow.add(new KeyboardButton("Нажми на меня"));
+        keyboardRow.add(new KeyboardButton("Показать список"));
+        keyboardRow.add(new KeyboardButton("Очистить список"));
         replyKeyboardMarkup.setKeyboard(keyboardRows);
+    }
+    private void sendMessage()
+    {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatID);
+        message.setText("Введите ");
     }
     private String parseMessage(String text) {
         String response;
         if (text.equals("/start")) {
             response = "Тестовое сообщение бота";
         }
-        else if (text.equals("Просвяти")) {
-            response = "Ты не достоин просвящения!";
-        } else if (text.equals("Нажми на меня")) {
-            response = "Ну и зачем ты на меня нажал ебалдуй?";
-        } else {
+        else if (text.startsWith("/add")) {
+            String[] parts = text.split(" ", 2);
+            stringList.add(parts[1]);
+            response = "Запись добавлена в массив";
+        }
+        else if (text.equals("/show") || text.equals("показать список"))
+        {
+            response = "Список текущих дел\n";
+            if (!stringList.isEmpty())
+            {
+                int i = 1;
+                for (String string : stringList)
+                {
+                    response += "Запись № " + i + " " + string + "\n" + "---------------------------------------" + "\n";
+                    i++;
+                }
+            }
+            else {
+                response = "Массив пуст";
+            }
+        }
+        else if (text.equals("/delete") || text.equals("очистить список"))
+        {
+            response = "Массив очищен";
+            stringList.clear();
+        }
+        else {
             response = "Сообщение не распознано";
         }
         return response;
