@@ -9,7 +9,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Bot extends TelegramLongPollingBot {
     public Bot()
@@ -18,11 +22,17 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private ReplyKeyboardMarkup replyKeyboardMarkup;
+    private Timer timer = new Timer();
+    TimerTask timerTask = new TimerTask() {
+        @Override
+        public void run() {
+
+        }
+    };
     @Override
     public String getBotUsername() {
         return "TeStTeXt111443242_bot";
     }
-
     @Override
     public String getBotToken() {
         return "6776303945:AAG9UnD2lGG8-FSOuIs5ZRudQIQhEoRNRbU";
@@ -34,7 +44,7 @@ public class Bot extends TelegramLongPollingBot {
             if (update.hasMessage() && update.getMessage().hasText()) {
                 Message message = update.getMessage();
                 String chatID = message.getChatId().toString();
-                String response = parseMessage(message.getText());
+                String response = parseMessage(message.getText().toLowerCase());
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setChatId(chatID);
                 sendMessage.setText(response);
@@ -44,6 +54,12 @@ public class Bot extends TelegramLongPollingBot {
         }catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getTime(String text)
+    {
+        text = text.replace("поставь напоминание на", "");
+        return text;
     }
     void initKeyboard()
     {
@@ -61,11 +77,22 @@ public class Bot extends TelegramLongPollingBot {
         if (text.equals("/start")) {
             response = "Тестовое сообщение бота";
         }
-        else if (text.equals("Просвяти")) {
+        else if (text.equals("просвяти")) {
             response = "Ты не достоин просвящения!";
-        } else if (text.equals("Нажми на меня")) {
+        } else if (text.equals("нажми на меня")) {
             response = "Ну и зачем ты на меня нажал ебалдуй?";
-        } else {
+        }
+        else if (text.contains("поставь напоминание на"))
+        {
+            response = getTime(text);
+        }
+        else if (text.equals("время"))
+        {
+            Date date = new Date();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+            response = "Текущее время: " + simpleDateFormat.format(date);
+        }
+        else {
             response = "Сообщение не распознано";
         }
         return response;
