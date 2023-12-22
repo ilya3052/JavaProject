@@ -9,11 +9,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class Bot extends TelegramLongPollingBot {
     public Bot()
@@ -22,13 +20,39 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private ReplyKeyboardMarkup replyKeyboardMarkup;
-    private Timer timer = new Timer();
+    private static Scanner scanner;
+    private static long time;
+    String chatID, response;
+    private static Timer timer = new Timer();
     TimerTask timerTask = new TimerTask() {
         @Override
         public void run() {
-
+            try {
+                sendMessage("Время пришло!");
+            } catch (TelegramApiException e) {
+                throw new RuntimeException(e);
+            }
         }
     };
+    private void startTimer (String text) throws TelegramApiException, ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        time = simpleDateFormat.parse(getTime(text)).getTime();
+        timer = new Timer(text);
+        timer.schedule(timerTask, time - new Date().getTime());
+    }
+
+    public static String getTime(String text) {
+        text = text.replace("поставь напоминание на ", "");
+        return text;
+    }
+
+    public void sendMessage(String text) throws TelegramApiException {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setText(text);
+        sendMessage.setChatId(chatID);
+        execute(sendMessage);
+    }
+
     @Override
     public String getBotUsername() {
         return "TeStTeXt111443242_bot";
@@ -43,8 +67,8 @@ public class Bot extends TelegramLongPollingBot {
         try {
             if (update.hasMessage() && update.getMessage().hasText()) {
                 Message message = update.getMessage();
-                String chatID = message.getChatId().toString();
-                String response = parseMessage(message.getText().toLowerCase());
+                chatID = message.getChatId().toString();
+                response = parseMessage(message.getText().toLowerCase());
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setChatId(chatID);
                 sendMessage.setText(response);
@@ -53,14 +77,11 @@ public class Bot extends TelegramLongPollingBot {
             }
         }catch (TelegramApiException e) {
             throw new RuntimeException(e);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private String getTime(String text)
-    {
-        text = text.replace("поставь напоминание на", "");
-        return text;
-    }
     void initKeyboard()
     {
         replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -72,7 +93,7 @@ public class Bot extends TelegramLongPollingBot {
         keyboardRow.add(new KeyboardButton("Нажми на меня"));
         replyKeyboardMarkup.setKeyboard(keyboardRows);
     }
-    private String parseMessage(String text) {
+    private String parseMessage(String text) throws TelegramApiException, ParseException {
         String response;
         if (text.equals("/start")) {
             response = "Тестовое сообщение бота";
@@ -84,7 +105,8 @@ public class Bot extends TelegramLongPollingBot {
         }
         else if (text.contains("поставь напоминание на"))
         {
-            response = getTime(text);
+            startTimer(text);
+            response = "Напоминание установлено!";
         }
         else if (text.equals("время"))
         {
