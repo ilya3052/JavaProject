@@ -1,5 +1,6 @@
 package org.example.bot;
 
+import org.example.taskStruct;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -13,12 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Bot extends TelegramLongPollingBot {
-    private List<String> stringList;
-    private static String chatID;
-    private static String response;
+    private List<taskStruct> taskStructsList;
+    private String chatID;
+    private String response;
+    private taskStruct taskObject;
     public Bot()
     {
-        stringList = new ArrayList<>();
+        taskStructsList = new ArrayList<>();
         initKeyboard();
     }
 
@@ -39,7 +41,7 @@ public class Bot extends TelegramLongPollingBot {
             if (update.hasMessage() && update.getMessage().hasText()) {
                 Message message = update.getMessage();
                 chatID = message.getChatId().toString();
-                response = parseMessage(message.getText().toLowerCase());
+                response = parseMessage(message.getText());
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setChatId(chatID);
                 sendMessage.setText(response);
@@ -50,8 +52,7 @@ public class Bot extends TelegramLongPollingBot {
             throw new RuntimeException(e);
         }
     }
-    void initKeyboard()
-    {
+    public void initKeyboard() {
         replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setResizeKeyboard(true);
         ArrayList<KeyboardRow> keyboardRows = new ArrayList<>();
@@ -61,31 +62,36 @@ public class Bot extends TelegramLongPollingBot {
         keyboardRow.add(new KeyboardButton("Очистить список"));
         replyKeyboardMarkup.setKeyboard(keyboardRows);
     }
-    private void sendMessage()
-    {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatID);
-        message.setText("Введите ");
-    }
-    private String parseMessage(String text) {
+    public String parseMessage(String text) {
         String response;
         if (text.equals("/start")) {
-            response = "Тестовое сообщение бота";
+            response = "Тестовое сообщение бота (изменить)";
         }
-        else if (text.startsWith("/add")) {
+        else if(text.contains("/addTask") && text.contains("/addTaskTime") && text.contains("/addTaskDescription")) {
+            text = text.replace("/addTask ", "").replace("/addTaskTime ", "")
+                    .replace("/addTaskDescription ", "");
+            String[] parts = text.split("\n", 3);
+            taskObject = new taskStruct(parts[0], parts[2], parts[1]);
+            taskStructsList.add(taskObject);
+            response = "Задача добавлена в список";
+        }
+        else if (text.startsWith("/addTask")) {
             String[] parts = text.split(" ", 2);
-            stringList.add(parts[1]);
-            response = "Запись добавлена в массив";
+            taskObject = new taskStruct(parts[1]);
+            taskStructsList.add(taskObject);
+            response = "Запись добавлена в список";
         }
-        else if (text.equals("/show") || text.equals("показать список"))
+        else if (text.equals("/show") || text.equals("Показать список"))
         {
             response = "Список текущих дел\n";
-            if (!stringList.isEmpty())
+            if (!taskStructsList.isEmpty())
             {
                 int i = 1;
-                for (String string : stringList)
+                for (taskStruct task : taskStructsList)
                 {
-                    response += "Запись № " + i + " " + string + "\n" + "---------------------------------------" + "\n";
+                    response += ("Номер задачи в списке " + i + "\nИмя задачи: " + task.getNameTask()
+                    + "\nОписание задачи: " + task.getTaskDescription() + "\nУстановленное время: "
+                    + task.getTime() + "\n\n");
                     i++;
                 }
             }
@@ -93,10 +99,10 @@ public class Bot extends TelegramLongPollingBot {
                 response = "Массив пуст";
             }
         }
-        else if (text.equals("/delete") || text.equals("очистить список"))
+        else if (text.equals("/delete") || text.equals("Очистить список"))
         {
             response = "Массив очищен";
-            stringList.clear();
+            taskStructsList.clear();
         }
         else {
             response = "Сообщение не распознано";
