@@ -69,7 +69,11 @@ public class Bot extends TelegramLongPollingBot {
             response = "Для вызова списка команд введите /help";
         }
         else if (text.equals("/help")) {
-            response = "Команды бота\n(допилить)";
+            response = "Команды бота\n1) /addTask 'Название задачи' - добавляет задачу только с названием\n"
+            + "2) Связка команд вида\n/addTask 'Название задачи'\n/addTaskTime '19:00'\n"
+            + "/addTaskDescription 'Описание задачи'\nДобавляет в список дел полную информацию о задаче.\n"
+            + "3) /find 'идентификатор задачи (позже допилю еще поиск по названию)'\n"
+            + "/clear - аналогично нажатию на кнопку 'Очистить список полностью очищает текущий список задач'";
         }
         else if(text.contains("/addTask") && text.contains("/addTaskTime") && text.contains("/addTaskDescription")) {
             text = text.replace("/addTask ", "").replace("/addTaskTime ", "")
@@ -140,7 +144,7 @@ public class Bot extends TelegramLongPollingBot {
                 response = "Массив пуст";
             }
         }
-        else if (text.equals("/delete") || text.equals("Очистить список")) {
+        else if (text.equals("/clear") || text.equals("Очистить список")) {
             response = "Массив очищен";
             chatTaskStructsMap.remove(chatID);
         }
