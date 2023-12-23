@@ -2,6 +2,8 @@ package org.example;
 
 public class TaskStruct {
     private String taskDescription, taskTime, taskName;
+    private static int count = 1;
+    private int id;
 //    private InlineKeyboardButton inlineKeyboardButton; кнопки на сообщении готовой записи, оставить Владосу
     /*предположительно для каждой записи будет несколько кнопок
     * 1) Изменить имя задачи
@@ -15,9 +17,11 @@ public class TaskStruct {
         this.taskName = taskName;
         this.taskDescription = taskDescription;
         this.taskTime = taskTime;
+        this.id = count++;
     }
     public TaskStruct(String taskName){
         this.taskName = taskName;
+        this.id = count++;
     }
     public void updateText(String additionalText){
         this.taskDescription += additionalText;
@@ -48,6 +52,10 @@ public class TaskStruct {
         {
             return "Не установлено";
         }
+    }
+    public int getId()
+    {
+        return this.id;
     }
 
 }

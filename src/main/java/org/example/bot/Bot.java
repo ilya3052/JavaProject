@@ -11,10 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Bot extends TelegramLongPollingBot {
     private Map<Long, List<TaskStruct>> chatTaskStructsMap;
@@ -69,7 +66,10 @@ public class Bot extends TelegramLongPollingBot {
     public String parseMessage(String text, long chatID) {
         String response;
         if (text.equals("/start")) {
-            response = "Тестовое сообщение бота (изменить)";
+            response = "Для вызова списка команд введите /help";
+        }
+        else if (text.equals("/help")) {
+            response = "Команды бота\n(допилить)";
         }
         else if(text.contains("/addTask") && text.contains("/addTaskTime") && text.contains("/addTaskDescription")) {
             text = text.replace("/addTask ", "").replace("/addTaskTime ", "")
@@ -87,8 +87,7 @@ public class Bot extends TelegramLongPollingBot {
             chatTaskStructsMap.computeIfAbsent(chatID, k -> new ArrayList<>()).add(taskObject);
             response = "Запись добавлена в список";
         }
-        else if (text.equals("Показать краткий список"))
-        {
+        else if (text.equals("Показать краткий список")) {
             response = "Список текущих дел\n";
             List<TaskStruct> taskStructsList = chatTaskStructsMap.get(chatID);
             if (taskStructsList != null && !taskStructsList.isEmpty())
@@ -104,8 +103,27 @@ public class Bot extends TelegramLongPollingBot {
                 response = "Массив пуст";
             }
         }
-        else if (text.equals("Показать подробный список"))
-        {
+        else if (text.contains("/find")) {
+            String id = text.replace("/find ", "");
+            List<TaskStruct> currTask = chatTaskStructsMap.get(chatID);
+            TaskStruct task = null;
+            Iterator iterator = currTask.iterator();
+            while (iterator.hasNext())
+            {
+                task = (TaskStruct) iterator.next();
+                if (String.valueOf(task.getId()) == id)
+                {
+                    break;
+                }
+            }
+            response = ("Имя задачи: " + task.getNameTask() + "\nОписание задачи: "
+                    + task.getTaskDescription() + "\nУстановленное время: " + task.getTime() + "\nИдентификатор: " + task.getId() + "\n\n");
+
+            if (task == null){
+                response = "Искомая запись не найдена";
+            }
+        }
+        else if (text.equals("Показать подробный список")) {
             response = "Список текущих дел\n";
             List<TaskStruct> taskStructsList = chatTaskStructsMap.get(chatID);
             if (taskStructsList != null && !taskStructsList.isEmpty())
@@ -114,7 +132,7 @@ public class Bot extends TelegramLongPollingBot {
                 for (TaskStruct task : taskStructsList)
                 {
                     response += ("№" + i + "\n" + "Имя задачи: " + task.getNameTask() + "\nОписание задачи: "
-                            + task.getTaskDescription() + "\nУстановленное время: " + task.getTime() + "\n\n");
+                            + task.getTaskDescription() + "\nУстановленное время: " + task.getTime() + "\nИдентификатор: " + task.getId() + "\n\n");
                     i++;
                 }
             }
@@ -122,8 +140,7 @@ public class Bot extends TelegramLongPollingBot {
                 response = "Массив пуст";
             }
         }
-        else if (text.equals("/delete") || text.equals("Очистить список"))
-        {
+        else if (text.equals("/delete") || text.equals("Очистить список")) {
             response = "Массив очищен";
             chatTaskStructsMap.remove(chatID);
         }
