@@ -1,5 +1,6 @@
 package org.example.bot;
 
+import org.checkerframework.checker.units.qual.K;
 import org.example.TaskStruct;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -60,7 +61,8 @@ public class Bot extends TelegramLongPollingBot {
         ArrayList<KeyboardRow> keyboardRows = new ArrayList<>();
         KeyboardRow keyboardRow = new KeyboardRow();
         keyboardRows.add(keyboardRow);
-        keyboardRow.add(new KeyboardButton("Показать список"));
+        keyboardRow.add(new KeyboardButton("Показать краткий список"));
+        keyboardRow.add(new KeyboardButton("Показать подробный список"));
         keyboardRow.add(new KeyboardButton("Очистить список"));
         replyKeyboardMarkup.setKeyboard(keyboardRows);
     }
@@ -85,7 +87,7 @@ public class Bot extends TelegramLongPollingBot {
             chatTaskStructsMap.computeIfAbsent(chatID, k -> new ArrayList<>()).add(taskObject);
             response = "Запись добавлена в список";
         }
-        else if (text.equals("/show") || text.equals("Показать список"))
+        else if (text.equals("Показать краткий список"))
         {
             response = "Список текущих дел\n";
             List<TaskStruct> taskStructsList = chatTaskStructsMap.get(chatID);
@@ -94,9 +96,25 @@ public class Bot extends TelegramLongPollingBot {
                 int i = 1;
                 for (TaskStruct task : taskStructsList)
                 {
-                    response += ("Номер задачи в списке " + i + "\nИмя задачи: " + task.getNameTask()
-                    + "\nОписание задачи: " + task.getTaskDescription() + "\nУстановленное время: "
-                    + task.getTime() + "\n\n");
+                    response += ("№" + i + ": " + task.getNameTask() + "\n");
+                    i++;
+                }
+            }
+            else {
+                response = "Массив пуст";
+            }
+        }
+        else if (text.equals("Показать подробный список"))
+        {
+            response = "Список текущих дел\n";
+            List<TaskStruct> taskStructsList = chatTaskStructsMap.get(chatID);
+            if (taskStructsList != null && !taskStructsList.isEmpty())
+            {
+                int i = 1;
+                for (TaskStruct task : taskStructsList)
+                {
+                    response += ("№" + i + "\n" + "Имя задачи: " + task.getNameTask() + "\nОписание задачи: "
+                            + task.getTaskDescription() + "\nУстановленное время: " + task.getTime() + "\n\n");
                     i++;
                 }
             }
