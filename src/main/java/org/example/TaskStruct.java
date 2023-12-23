@@ -1,6 +1,6 @@
 package org.example;
 
-public class taskStruct {
+public class TaskStruct {
     private String taskDescription, taskTime, taskName;
 //    private InlineKeyboardButton inlineKeyboardButton; кнопки на сообщении готовой записи, оставить Владосу
     /*предположительно для каждой записи будет несколько кнопок
@@ -11,12 +11,12 @@ public class taskStruct {
     * 5) Удалить запись
     *
     * Кнопки для общего списка задач пропишу позже, там они чуть иные будут*/
-    public taskStruct(String taskName, String taskDescription, String taskTime){
+    public TaskStruct(String taskName, String taskDescription, String taskTime){
         this.taskName = taskName;
         this.taskDescription = taskDescription;
         this.taskTime = taskTime;
     }
-    public taskStruct(String taskName){
+    public TaskStruct(String taskName){
         this.taskName = taskName;
     }
     public void updateText(String additionalText){

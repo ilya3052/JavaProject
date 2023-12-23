@@ -1,6 +1,6 @@
 package org.example.bot;
 
-import org.example.taskStruct;
+import org.example.TaskStruct;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -11,16 +11,18 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Bot extends TelegramLongPollingBot {
-    private List<taskStruct> taskStructsList;
-    private String chatID;
-    private String response;
-    private taskStruct taskObject;
+    private Map<Long, List<TaskStruct>> chatTaskStructsMap;
+    private Map<Long, TaskStruct> chatTaskObjectMap;
+    private TaskStruct taskObject;
     public Bot()
     {
-        taskStructsList = new ArrayList<>();
+        chatTaskStructsMap = new HashMap<>();
+        chatTaskObjectMap = new HashMap<>();
         initKeyboard();
     }
 
@@ -40,10 +42,10 @@ public class Bot extends TelegramLongPollingBot {
         try {
             if (update.hasMessage() && update.getMessage().hasText()) {
                 Message message = update.getMessage();
-                chatID = message.getChatId().toString();
-                response = parseMessage(message.getText());
+                long chatID = message.getChatId();
+                String response = parseMessage(message.getText(), chatID);
                 SendMessage sendMessage = new SendMessage();
-                sendMessage.setChatId(chatID);
+                sendMessage.setChatId(String.valueOf(chatID));
                 sendMessage.setText(response);
                 sendMessage.setReplyMarkup(replyKeyboardMarkup);
                 execute(sendMessage);
@@ -62,7 +64,7 @@ public class Bot extends TelegramLongPollingBot {
         keyboardRow.add(new KeyboardButton("Очистить список"));
         replyKeyboardMarkup.setKeyboard(keyboardRows);
     }
-    public String parseMessage(String text) {
+    public String parseMessage(String text, long chatID) {
         String response;
         if (text.equals("/start")) {
             response = "Тестовое сообщение бота (изменить)";
@@ -71,23 +73,26 @@ public class Bot extends TelegramLongPollingBot {
             text = text.replace("/addTask ", "").replace("/addTaskTime ", "")
                     .replace("/addTaskDescription ", "");
             String[] parts = text.split("\n", 3);
-            taskObject = new taskStruct(parts[0], parts[2], parts[1]);
-            taskStructsList.add(taskObject);
+            taskObject = new TaskStruct(parts[0], parts[2], parts[1]);
+            chatTaskObjectMap.put(chatID, taskObject);
+            chatTaskStructsMap.computeIfAbsent(chatID, k -> new ArrayList<>()).add(taskObject);
             response = "Задача добавлена в список";
         }
         else if (text.startsWith("/addTask")) {
             String[] parts = text.split(" ", 2);
-            taskObject = new taskStruct(parts[1]);
-            taskStructsList.add(taskObject);
+            taskObject = new TaskStruct(parts[1]);
+            chatTaskObjectMap.put(chatID, taskObject);
+            chatTaskStructsMap.computeIfAbsent(chatID, k -> new ArrayList<>()).add(taskObject);
             response = "Запись добавлена в список";
         }
         else if (text.equals("/show") || text.equals("Показать список"))
         {
             response = "Список текущих дел\n";
-            if (!taskStructsList.isEmpty())
+            List<TaskStruct> taskStructsList = chatTaskStructsMap.get(chatID);
+            if (taskStructsList != null && !taskStructsList.isEmpty())
             {
                 int i = 1;
-                for (taskStruct task : taskStructsList)
+                for (TaskStruct task : taskStructsList)
                 {
                     response += ("Номер задачи в списке " + i + "\nИмя задачи: " + task.getNameTask()
                     + "\nОписание задачи: " + task.getTaskDescription() + "\nУстановленное время: "
@@ -102,7 +107,7 @@ public class Bot extends TelegramLongPollingBot {
         else if (text.equals("/delete") || text.equals("Очистить список"))
         {
             response = "Массив очищен";
-            taskStructsList.clear();
+            chatTaskStructsMap.remove(chatID);
         }
         else {
             response = "Сообщение не распознано";
