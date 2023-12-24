@@ -1,7 +1,8 @@
 package org.example;
 
 public class TaskStruct {
-    private String taskDescription, taskTime, taskName, chatId;
+    private String taskDescription, taskTime, taskName;
+    private static String chatId;
     private static int count = 1;
     private int id;
 //    private InlineKeyboardButton inlineKeyboardButton; кнопки на сообщении готовой записи, оставить Владосу
@@ -18,12 +19,12 @@ public class TaskStruct {
         this.taskDescription = taskDescription;
         this.taskTime = taskTime;
         this.id = count++;
-        this.chatId = chatId;
+        TaskStruct.chatId = chatId;
     }
     public TaskStruct(String taskName, String chatId){
         this.taskName = taskName;
         this.id = count++;
-        this.chatId = chatId;
+        TaskStruct.chatId = chatId;
     }
     public void updateText(String additionalText){
         this.taskDescription += additionalText;
