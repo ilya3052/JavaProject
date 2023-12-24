@@ -104,14 +104,14 @@ public class Bot extends TelegramLongPollingBot {
             text = text.replace("/addTask ", "").replace("/addTaskTime ", "")
                     .replace("/addTaskDescription ", "");
             String[] parts = text.split("\n", 3);
-            taskObject = new TaskStruct(parts[0], parts[2], parts[1]);
+            taskObject = new TaskStruct(parts[0], parts[2], parts[1], String.valueOf(chatID));
             chatTaskObjectMap.put(chatID, taskObject);
             chatTaskStructsMap.computeIfAbsent(chatID, k -> new ArrayList<>()).add(taskObject);
             response = "Задача добавлена в список";
         }
         else if (text.startsWith("/addTask")) {
             String[] parts = text.split(" ", 2);
-            taskObject = new TaskStruct(parts[1]);
+            taskObject = new TaskStruct(parts[1], String.valueOf(chatID));
             chatTaskObjectMap.put(chatID, taskObject);
             chatTaskStructsMap.computeIfAbsent(chatID, k -> new ArrayList<>()).add(taskObject);
             response = "Запись добавлена в список";
