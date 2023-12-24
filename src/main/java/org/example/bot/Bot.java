@@ -62,7 +62,8 @@ public class Bot extends TelegramLongPollingBot {
         secondRow.add(new KeyboardButton("Очистить список"));
         secondRow.add(new KeyboardButton("Помощь"));
         KeyboardRow thirdRow = new KeyboardRow();
-        thirdRow.add(new KeyboardButton("Сохранить в файл"));
+        thirdRow.add(new KeyboardButton("Сохранить задачи в файл"));
+        thirdRow.add(new KeyboardButton("Загрузить задачи из файла"));
         keyboardRows.add(firstRow);
         keyboardRows.add(secondRow);
         keyboardRows.add(thirdRow);
@@ -97,7 +98,7 @@ public class Bot extends TelegramLongPollingBot {
                     /addTaskDescription Описание задачи
                     Добавляет в список дел полную информацию о задаче.
                     3) /find идентификатор задачи (позже допилю еще поиск по названию)
-                    /clear - аналогично нажатию на кнопку Очистить список полностью очищает текущий список задач""";
+                    4) /clear - аналогично нажатию на кнопку Очистить список полностью очищает текущий список задач""";
         }
         else if(text.contains("/addTask") && text.contains("/addTaskTime") && text.contains("/addTaskDescription")) {
             text = text.replace("/addTask ", "").replace("/addTaskTime ", "")
