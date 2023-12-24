@@ -61,7 +61,7 @@ public class TaskStruct {
         return this.id;
     }
     public String getChatId(){
-        return this.chatId;
+        return chatId;
     }
 
 }
