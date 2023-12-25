@@ -11,6 +11,10 @@ import java.io.IOException;
 public class TaskParser {
 
     public void parseToJSON(long chatId, TaskStruct chatTaskObj)  {
+        String dirName = Long.toString(chatId);
+        File dir = new File(dirName);
+        if (!dir.exists()) dir.mkdir();
+        
         // Создание объекта ObjectMapper
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -20,10 +24,9 @@ public class TaskParser {
         jsonNode.put("Время", chatTaskObj.getTime());
         jsonNode.put("Описание задачи", chatTaskObj.getTaskDescription());
         jsonNode.put("Идентификатор задачи", chatTaskObj.getId());
-
         // Запись JSON в файл
         try {
-            String nameJSONFile = chatId + ".json";
+            String nameJSONFile = dirName + "/" + chatTaskObj.getNameTask() + ".json";
             objectMapper.writeValue(new File(nameJSONFile), jsonNode);
         } catch (IOException e) {
             e.printStackTrace();
