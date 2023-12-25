@@ -17,7 +17,7 @@ import java.util.*;
 public class Bot extends TelegramLongPollingBot {
     private Map<Long, List<TaskStruct>> chatTaskStructsMap;
     private Map<Long, TaskStruct> chatTaskObjectMap;
-    private TaskStruct taskObject;
+
     public Bot()
     {
         chatTaskStructsMap = new HashMap<>();
@@ -95,6 +95,7 @@ public class Bot extends TelegramLongPollingBot {
 
     public String parseMessage(String text, long chatID) {
         String response;
+        TaskStruct taskObject;
         if (text.equals("/start")) {
             response = "Для вызова списка команд введите /help";
         }
