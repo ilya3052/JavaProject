@@ -73,11 +73,21 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public TaskStruct findTask(String text, long chatID) {
-        String id = text.replace("/find ", "");
+        String name = text.replace("/find ", "").trim();
         List<TaskStruct> currTask = chatTaskStructsMap.get(chatID);
-        for (TaskStruct taskStruct : currTask) {
-            if (String.valueOf(taskStruct.getId()).equals(id)) {
-                return taskStruct;
+        if (StringUtils.isNumeric(name))
+        {
+            for (TaskStruct taskStruct : currTask) {
+                if (String.valueOf(taskStruct.getId()).equals(name)) {
+                    return taskStruct;
+                }
+            }
+        }
+        else {
+            for (TaskStruct taskStruct : currTask) {
+                if (taskStruct.getNameTask().equals(name)) {
+                    return taskStruct;
+                }
             }
         }
         return null;
@@ -97,11 +107,11 @@ public class Bot extends TelegramLongPollingBot {
                     /addTaskTime "Время задачи"
                     /addTaskDescription "Описание задачи"
                     Добавляет в список дел полную информацию о задаче.
-                    3) /updateTaskDescription "Номер задачи в списке" "Дополнение к описанию задачи" - добавляет к описанию задачи новые пункты
-                    4) /updateTaskName "Номер задачи в списке" "Новое имя задачи" - изменяет имя задачи на указанное пользователем
-                    5) /updateTime "Номер задачи в списке" "Новое время" - изменяет время в задаче на указанное пользователем
-                    6) /setNewTaskDescription "Номер задачи в списке" "Новое описание задачи" - полностью меняет описание задачи на указанное пользователем
-                    7) /find "Номер задачи в списке" (позже допилю еще поиск по названию)
+                    3) /updateTaskDescription "Номер задачи в списке/Имя задачи в списке" - "Дополнение к описанию задачи": добавляет к описанию задачи новые пункты
+                    4) /updateTaskName "Номер задачи в списке/Имя задачи в списке" - "Новое имя задачи": изменяет имя задачи на указанное пользователем
+                    5) /updateTime "Номер задачи в списке/Имя задачи в списке" - "Новое время": изменяет время в задаче на указанное пользователем
+                    6) /setNewTaskDescription "Номер задачи в списке" - "Новое описание задачи": полностью меняет описание задачи на указанное пользователем
+                    7) /find "Номер задачи в списке/Имя задачи в списке" (позже допилю еще поиск по названию)
                     8) /clear - аналогично нажатию на кнопку Очистить список полностью очищает текущий список задач""";
         }
         else if(text.contains("/addTask") && text.contains("/addTaskTime") && text.contains("/addTaskDescription")) {
@@ -168,12 +178,23 @@ public class Bot extends TelegramLongPollingBot {
         else if (text.contains("/update")) {
             response = "Объект не найден";
             TaskStruct task = null;
-            String id = text.split(" ", 3)[1];
+            String name = text.split("-")[0].split(" ", 2)[1].trim();
             List<TaskStruct> currTask = chatTaskStructsMap.get(chatID);
-            for (TaskStruct taskStruct : currTask) {
-                if (String.valueOf(taskStruct.getId()).equals(id)) {
-                    task = taskStruct;
-                    break;
+            if (StringUtils.isNumeric(name))
+            {
+                for (TaskStruct taskStruct : currTask) {
+                    if (String.valueOf(taskStruct.getId()).equals(name)) {
+                        task = taskStruct;
+                        break;
+                    }
+                }
+            }
+            else {
+                for (TaskStruct taskStruct : currTask) {
+                    if (taskStruct.getNameTask().equals(name)) {
+                        task = taskStruct;
+                        break;
+                    }
                 }
             }
             if (task != null) {
@@ -188,26 +209,32 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private void updateTask(String text, TaskStruct task) {
-        String[] parts;
-        String switch_text = text.split(" ", 2)[0];
+        String switch_text = text.split(" ", 2)[0], taskUpdate;
         switch (switch_text){
             case "/updateTaskDescription":
-                parts = text.replace("/updateTaskDescription ", "").split(" ", 2);
-                task.updateTaskDescription(parts[1]);
+                taskUpdate = text.replace("/updateTaskDescription ", "")
+                        .split(" ", 2)[1]
+                        .split("-", 2)[1].trim();
+                task.updateTaskDescription(taskUpdate);
                 break;
             case "/updateTaskName":
-                parts = text.replace("/updateTaskName ", "").split(" ", 2);
-                task.updateTaskName(parts[1]);
+                taskUpdate = text.replace("/updateTaskName ", "")
+                        .split(" ", 2)[1]
+                        .split("-", 2)[1].trim();
+                task.updateTaskName(taskUpdate);
                 break;
             case "/updateTime":
-                parts = text.replace("/updateTime ", "").split(" ", 2);
-                task.updateTime(parts[1]);
+                taskUpdate = text.replace("/updateTime ", "")
+                        .split(" ", 2)[1]
+                        .split("-", 2)[1].trim();
+                task.updateTime(taskUpdate);
                 break;
             case "/setNewTaskDescription":
-                parts = text.replace("/setNewTaskDescription ", "").split(" ", 2);
-                task.setNewTaskDescription(parts[1]);
+                taskUpdate = text.replace("/setNewTaskDescription ", "")
+                        .split(" ", 2)[1]
+                        .split("-", 2)[1].trim();
+                task.setNewTaskDescription(taskUpdate);
                 break;
         }
-//        return task;
     }
 }
