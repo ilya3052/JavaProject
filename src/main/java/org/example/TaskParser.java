@@ -34,7 +34,7 @@ public class TaskParser {
 
         // Чтение JSON из файла
         try {
-            JsonNode readNode = objectMapper.readTree(new File(chatId + ".json"));
+            JsonNode readNode = objectMapper.readTree(new File(dirName + "/" + chatTaskObj.getNameTask() + ".json"));
             System.out.println("Итоговый JSON файл: " + readNode);
         } catch (IOException e) {
             e.printStackTrace();
