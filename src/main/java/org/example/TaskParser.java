@@ -6,13 +6,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.annotation.*;
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.*;
+import java.io.File;
 
 public class TaskParser {
 
     public void parseToJSON(long chatId, TaskStruct chatTaskObj)  {
-        String dirName = Long.toString(chatId);
+        String dirName = "Tasks/" + Long.toString(chatId);
         File dir = new File(dirName);
         if (!dir.exists()) dir.mkdir();
         
@@ -25,29 +26,20 @@ public class TaskParser {
         jsonNode.put("Время", chatTaskObj.getTime());
         jsonNode.put("Описание задачи", chatTaskObj.getTaskDescription());
         jsonNode.put("Идентификатор задачи", chatTaskObj.getId());
+        String nameJSONFile = dirName + "/" + chatTaskObj.getNameTask() + ".json";
         // Запись JSON в файл
         try {
-            String nameJSONFile = dirName + "/" + chatTaskObj.getNameTask() + ".json";
             objectMapper.writeValue(new File(nameJSONFile), jsonNode);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        // Чтение JSON из файла
+        // Чтение JSON из файла для проверки правильного создания .json файла
         try {
-            JsonNode readNode = objectMapper.readTree(new File(dirName + "/" + chatTaskObj.getNameTask() + ".json"));
+            JsonNode readNode = objectMapper.readTree(new File(nameJSONFile));
             System.out.println("Итоговый JSON файл: " + readNode);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-    public void clearDir(long chatId) {
-        String dirName = Long.toString(chatId);
-        try {
-            FileUtils.cleanDirectory(new File(dirName));
-            System.out.println("Директория " + dirName + " успешно удалена");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }
