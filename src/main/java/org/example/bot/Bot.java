@@ -1,7 +1,5 @@
 package org.example.bot;
 
-import org.example.TaskStruct;
-import org.example.TaskParser;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -13,6 +11,12 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.*;
 
+import java.io.File;
+import org.example.TaskStruct;
+import org.example.TaskParser;
+import org.example.ReaderJSON;
+import org.example.FolderDemon;
+
 public class Bot extends TelegramLongPollingBot {
     private Map<Long, List<TaskStruct>> chatTaskStructsMap;
     private Map<Long, TaskStruct> chatTaskObjectMap;
@@ -22,6 +26,10 @@ public class Bot extends TelegramLongPollingBot {
         chatTaskStructsMap = new HashMap<>();
         chatTaskObjectMap = new HashMap<>();
         initKeyboard();
+        ReaderJSON readerJS = new ReaderJSON();
+        String nameTaskFolder = "Tasks";
+        File taskUserFolder = new File(nameTaskFolder);
+        this.chatTaskStructsMap = readerJS.deserialize(taskUserFolder);
     }
 
     private ReplyKeyboardMarkup replyKeyboardMarkup;
@@ -41,11 +49,16 @@ public class Bot extends TelegramLongPollingBot {
             if (update.hasMessage() && update.getMessage().hasText()) {
                 Message message = update.getMessage();
                 long chatID = message.getChatId();
+                if (this.chatTaskObjectMap.isEmpty()) {
+                    List<TaskStruct> taskStructsList = chatTaskStructsMap.get(chatID);
+                    for (TaskStruct task : taskStructsList) {
+                      this.chatTaskObjectMap.put(chatID, task);
+                    }
+                }
                 String response = parseMessage(message.getText(), chatID);
-                if (response == "Задача добавлена в список" || response == "Запись добавлена в список") {
-                    TaskParser parser = new TaskParser(); 
+                if (response.equals("Задача добавлена в список") || response.equals("Запись добавлена в список")) {
+                    TaskParser parser = new TaskParser();
                     parser.parseToJSON(chatID, taskObject);
-
                 }
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setChatId(String.valueOf(chatID));
@@ -67,11 +80,8 @@ public class Bot extends TelegramLongPollingBot {
         KeyboardRow secondRow = new KeyboardRow();
         secondRow.add(new KeyboardButton("Очистить список"));
         secondRow.add(new KeyboardButton("Помощь"));
-        KeyboardRow thirdRow = new KeyboardRow();
-        thirdRow.add(new KeyboardButton("Сохранить в файл"));
         keyboardRows.add(firstRow);
         keyboardRows.add(secondRow);
-        keyboardRows.add(thirdRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
     }
 
@@ -132,7 +142,7 @@ public class Bot extends TelegramLongPollingBot {
                 }
             }
             else {
-                response = "Массив пуст";
+                response = "Список задач пуст";
             }
         }
         else if (text.contains("/find")) {
@@ -157,12 +167,14 @@ public class Bot extends TelegramLongPollingBot {
                 }
             }
             else {
-                response = "Массив пуст";
+                response = "Список задач пуст";
             }
         }
         else if (text.equals("/clear") || text.equals("Очистить список")) {
-            response = "Массив очищен";
+            response = "Список очищен";
             chatTaskStructsMap.remove(chatID);
+            FolderDemon fd = new FolderDemon();
+            fd.clearDir(chatID);
         }
         else {
             response = "Сообщение не распознано";

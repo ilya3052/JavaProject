@@ -23,6 +23,7 @@ public class TaskStruct {
         this.taskName = taskName;
         this.id = count++;
     }
+    public TaskStruct() {}
     public void updateText(String additionalText){
         this.taskDescription += additionalText;
     }
@@ -56,6 +57,9 @@ public class TaskStruct {
     public int getId()
     {
         return this.id;
+    }
+    public void setId(int newID) {
+      this.id = newID;
     }
 
 }

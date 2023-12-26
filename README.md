@@ -27,7 +27,6 @@
     $ git clone https://github.com/ilya3052/JavaProject.git /путь/в/директорию/названиеПроекта
     $ cd /путь/в/директорию/названиеПроекта
     $ mvn complie
-    $ mvn package
     $ mvn exec:java -Dexec.mainClass="org.example.Main" 
 ```
 
