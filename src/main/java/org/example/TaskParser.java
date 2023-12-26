@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.annotation.*;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +39,15 @@ public class TaskParser {
             System.out.println("Итоговый JSON файл: " + readNode);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    public void clearDir(long chatId) {
+        String dirName = Long.toString(chatId);
+        try {
+            FileUtils.cleanDirectory(new File(dirName));
+            System.out.println("Директория " + dirName + " успешно удалена");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

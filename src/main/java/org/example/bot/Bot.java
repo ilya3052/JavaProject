@@ -42,10 +42,9 @@ public class Bot extends TelegramLongPollingBot {
                 Message message = update.getMessage();
                 long chatID = message.getChatId();
                 String response = parseMessage(message.getText(), chatID);
-                if (response == "Задача добавлена в список" || response == "Запись добавлена в список") {
-                    TaskParser parser = new TaskParser(); 
+                if (response.equals("Задача добавлена в список") || response.equals("Запись добавлена в список")) {
+                    TaskParser parser = new TaskParser();
                     parser.parseToJSON(chatID, taskObject);
-
                 }
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setChatId(String.valueOf(chatID));
@@ -67,11 +66,8 @@ public class Bot extends TelegramLongPollingBot {
         KeyboardRow secondRow = new KeyboardRow();
         secondRow.add(new KeyboardButton("Очистить список"));
         secondRow.add(new KeyboardButton("Помощь"));
-        KeyboardRow thirdRow = new KeyboardRow();
-        thirdRow.add(new KeyboardButton("Сохранить в файл"));
         keyboardRows.add(firstRow);
         keyboardRows.add(secondRow);
-        keyboardRows.add(thirdRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
     }
 
@@ -132,7 +128,7 @@ public class Bot extends TelegramLongPollingBot {
                 }
             }
             else {
-                response = "Массив пуст";
+                response = "Список задач пуст";
             }
         }
         else if (text.contains("/find")) {
@@ -157,12 +153,14 @@ public class Bot extends TelegramLongPollingBot {
                 }
             }
             else {
-                response = "Массив пуст";
+                response = "Список задач пуст";
             }
         }
         else if (text.equals("/clear") || text.equals("Очистить список")) {
-            response = "Массив очищен";
+            response = "Список очищен";
             chatTaskStructsMap.remove(chatID);
+            TaskParser parser = new TaskParser();
+            parser.clearDir(chatID);
         }
         else {
             response = "Сообщение не распознано";
