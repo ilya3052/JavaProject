@@ -1,5 +1,6 @@
 package org.example.bot;
 
+import org.apache.commons.lang3.StringUtils;
 import org.example.TaskStruct;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -12,6 +13,12 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.*;
 
+import java.io.File;
+import org.example.TaskStruct;
+import org.example.TaskParser;
+import org.example.ReaderJSON;
+import org.example.FolderDemon;
+
 public class Bot extends TelegramLongPollingBot {
     private Map<Long, List<TaskStruct>> chatTaskStructsMap;
     private Map<Long, TaskStruct> chatTaskObjectMap;
@@ -21,6 +28,10 @@ public class Bot extends TelegramLongPollingBot {
         chatTaskStructsMap = new HashMap<>();
         chatTaskObjectMap = new HashMap<>();
         initKeyboard();
+        ReaderJSON readerJS = new ReaderJSON();
+        String nameTaskFolder = "Tasks";
+        File taskUserFolder = new File(nameTaskFolder);
+        this.chatTaskStructsMap = readerJS.deserialize(taskUserFolder);
     }
 
     private ReplyKeyboardMarkup replyKeyboardMarkup;
@@ -40,7 +51,17 @@ public class Bot extends TelegramLongPollingBot {
             if (update.hasMessage() && update.getMessage().hasText()) {
                 Message message = update.getMessage();
                 long chatID = message.getChatId();
+                if (this.chatTaskObjectMap.isEmpty()) {
+                    List<TaskStruct> taskStructsList = chatTaskStructsMap.get(chatID);
+                    for (TaskStruct task : taskStructsList) {
+                      this.chatTaskObjectMap.put(chatID, task);
+                    }
+                }
                 String response = parseMessage(message.getText(), chatID);
+                if (response.equals("Задача добавлена в список") || response.equals("Запись добавлена в список")) {
+                    TaskParser parser = new TaskParser();
+                    parser.parseToJSON(chatID, taskObject);
+                }
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setChatId(String.valueOf(chatID));
                 sendMessage.setText(response);
@@ -61,26 +82,20 @@ public class Bot extends TelegramLongPollingBot {
         KeyboardRow secondRow = new KeyboardRow();
         secondRow.add(new KeyboardButton("Очистить список"));
         secondRow.add(new KeyboardButton("Помощь"));
-        KeyboardRow thirdRow = new KeyboardRow();
-        thirdRow.add(new KeyboardButton("Сохранить задачи в файл"));
-        thirdRow.add(new KeyboardButton("Загрузить задачи из файла"));
         keyboardRows.add(firstRow);
         keyboardRows.add(secondRow);
-        keyboardRows.add(thirdRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
     }
 
     public TaskStruct findTask(String text, long chatID) {
         String id = text.replace("/find ", "");
         List<TaskStruct> currTask = chatTaskStructsMap.get(chatID);
-        TaskStruct task = null;
         for (TaskStruct taskStruct : currTask) {
-            task = taskStruct;
-            if (String.valueOf(task.getId()).equals(id)) {
-                break;
+            if (String.valueOf(taskStruct.getId()).equals(id)) {
+                return taskStruct;
             }
         }
-        return task;
+        return null;
     }
 
     public String parseMessage(String text, long chatID) {
@@ -91,14 +106,18 @@ public class Bot extends TelegramLongPollingBot {
         else if (text.equals("/help") || text.equals("Помощь")) {
             response = """
                     Команды бота
-                    1) /addTask Название задачи - добавляет задачу только с названием
+                    1) /addTask "Название задачи" - добавляет задачу только с названием
                     2) Связка команд вида
-                    /addTask Название задачи
-                    /addTaskTime 19:00
-                    /addTaskDescription Описание задачи
+                    /addTask "Название задачи"
+                    /addTaskTime "Время задачи"
+                    /addTaskDescription "Описание задачи"
                     Добавляет в список дел полную информацию о задаче.
-                    3) /find идентификатор задачи (позже допилю еще поиск по названию)
-                    4) /clear - аналогично нажатию на кнопку Очистить список полностью очищает текущий список задач""";
+                    3) /updateTaskDescription "Номер задачи в списке" "Дополнение к описанию задачи" - добавляет к описанию задачи новые пункты
+                    4) /updateTaskName "Номер задачи в списке" "Новое имя задачи" - изменяет имя задачи на указанное пользователем
+                    5) /updateTime "Номер задачи в списке" "Новое время" - изменяет время в задаче на указанное пользователем
+                    6) /setNewTaskDescription "Номер задачи в списке" "Новое описание задачи" - полностью меняет описание задачи на указанное пользователем
+                    7) /find "Номер задачи в списке" (позже допилю еще поиск по названию)
+                    8) /clear - аналогично нажатию на кнопку Очистить список полностью очищает текущий список задач""";
         }
         else if(text.contains("/addTask") && text.contains("/addTaskTime") && text.contains("/addTaskDescription")) {
             text = text.replace("/addTask ", "").replace("/addTaskTime ", "")
@@ -129,7 +148,7 @@ public class Bot extends TelegramLongPollingBot {
                 }
             }
             else {
-                response = "Массив пуст";
+                response = "Список задач пуст";
             }
         }
         else if (text.contains("/find")) {
@@ -154,16 +173,43 @@ public class Bot extends TelegramLongPollingBot {
                 }
             }
             else {
-                response = "Массив пуст";
+                response = "Список задач пуст";
             }
         }
         else if (text.equals("/clear") || text.equals("Очистить список")) {
-            response = "Массив очищен";
+            response = "Список очищен";
             chatTaskStructsMap.remove(chatID);
+            FolderDemon fd = new FolderDemon();
+            fd.clearDir(chatID);
         }
         else {
             response = "Сообщение не распознано";
         }
+
         return response;
+    }
+
+    private void updateTask(String text, TaskStruct task) {
+        String[] parts;
+        String switch_text = text.split(" ", 2)[0];
+        switch (switch_text){
+            case "/updateTaskDescription":
+                parts = text.replace("/updateTaskDescription ", "").split(" ", 2);
+                task.updateTaskDescription(parts[1]);
+                break;
+            case "/updateTaskName":
+                parts = text.replace("/updateTaskName ", "").split(" ", 2);
+                task.updateTaskName(parts[1]);
+                break;
+            case "/updateTime":
+                parts = text.replace("/updateTime ", "").split(" ", 2);
+                task.updateTime(parts[1]);
+                break;
+            case "/setNewTaskDescription":
+                parts = text.replace("/setNewTaskDescription ", "").split(" ", 2);
+                task.setNewTaskDescription(parts[1]);
+                break;
+        }
+//        return task;
     }
 }

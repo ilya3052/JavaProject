@@ -5,15 +5,7 @@ public class TaskStruct {
     private static String chatId;
     private static int count = 1;
     private int id;
-//    private InlineKeyboardButton inlineKeyboardButton; кнопки на сообщении готовой записи, оставить Владосу
-    /*предположительно для каждой записи будет несколько кнопок
-    * 1) Изменить имя задачи
-    * 2) Изменить описание задачи
-    * 3) Добавить текст к описанию задачи
-    * 4) Изменить время записи
-    * 5) Удалить запись
-    *
-    * Кнопки для общего списка задач пропишу позже, там они чуть иные будут*/
+
     public TaskStruct(String taskName, String taskDescription, String taskTime, String chatId){
         this.taskName = taskName;
         this.taskDescription = taskDescription;
@@ -26,11 +18,22 @@ public class TaskStruct {
         this.id = count++;
         TaskStruct.chatId = chatId;
     }
-    public void updateText(String additionalText){
-        this.taskDescription += additionalText;
+    public void updateTaskDescription(String additionalText){
+        if (this.taskDescription.endsWith(".") || this.taskDescription.endsWith("?") || this.taskDescription.endsWith("!")) {
+            this.taskDescription += (" " + additionalText);
+        }
+        else{
+            this.taskDescription += (". " + additionalText);
+        }
     }
-    public void updateName(String newTaskName){
+    public void updateTaskName(String newTaskName){
         this.taskName = newTaskName;
+    }
+    public void setNewTaskDescription(String newTaskDescription){
+        this.taskDescription = newTaskDescription;
+    }
+    public void updateTime(String newTaskTime){
+        this.taskTime = newTaskTime;
     }
     public String getNameTask(){
         return this.taskName;
@@ -42,9 +45,6 @@ public class TaskStruct {
         else {
             return "Не установлено";
         }
-    }
-    public void updateTime(String newTaskTime){
-        this.taskTime = newTaskTime;
     }
     public String getTime(){
         if (this.taskTime != null)
@@ -60,8 +60,8 @@ public class TaskStruct {
     {
         return this.id;
     }
-    public String getChatId(){
-        return chatId;
+    public void setId(int newID) {
+      this.id = newID;
     }
 
 }
