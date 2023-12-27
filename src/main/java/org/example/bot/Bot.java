@@ -49,7 +49,7 @@ public class Bot extends TelegramLongPollingBot {
             if (update.hasMessage() && update.getMessage().hasText()) {
                 Message message = update.getMessage();
                 long chatID = message.getChatId();
-                if (this.chatTaskObjectMap.isEmpty()) {
+                if (this.chatTaskObjectMap.isEmpty() && !this.chatTaskStructsMap.isEmpty()) {
                     List<TaskStruct> taskStructsList = chatTaskStructsMap.get(chatID);
                     for (TaskStruct task : taskStructsList) {
                       this.chatTaskObjectMap.put(chatID, task);
