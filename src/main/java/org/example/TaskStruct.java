@@ -18,8 +18,13 @@ public class TaskStruct {
         this.id = count++;
         TaskStruct.chatId = chatId;
     }
+    public TaskStruct(){}
     public void updateTaskDescription(String additionalText){
-        if (this.taskDescription.endsWith(".") || this.taskDescription.endsWith("?") || this.taskDescription.endsWith("!")) {
+        if (this.taskDescription == null)
+        {
+            this.taskDescription = additionalText;
+        }
+        else if (this.taskDescription.endsWith(".") || this.taskDescription.endsWith("?") || this.taskDescription.endsWith("!")) {
             this.taskDescription += (" " + additionalText);
         }
         else{

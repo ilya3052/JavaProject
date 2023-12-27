@@ -20,11 +20,11 @@ public class ReaderJSON {
         try {
         System.out.println(entry.getName());
         ObjectMapper objectMapper = new ObjectMapper();
-        TaskStruct task = new TaskStruct();
+        TaskStruct task = new TaskStruct(null, null, null, null);
         JsonNode rootNode = objectMapper.readTree(entry);
-        task.updateName(rootNode.get("Название задачи").asText());
+        task.updateTaskName(rootNode.get("Название задачи").asText());
         task.updateTime(rootNode.get("Время").asText());
-        task.updateText(rootNode.get("Описание задачи").asText());
+        task.updateTaskDescription(rootNode.get("Описание задачи").asText());
         task.setId(Integer.parseInt(rootNode.get("Идентификатор задачи").asText()));
         oldObjMap.add(task);
         } catch (IOException e) {
