@@ -86,7 +86,35 @@ public class Bot extends TelegramLongPollingBot {
         keyboardRows.add(secondRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
     }
-
+    public void updateTask(String text, TaskStruct task) {
+        String switch_text = text.split(" ", 2)[0], taskUpdate;
+        switch (switch_text){
+            case "/updateTaskDescription":
+                taskUpdate = text.replace("/updateTaskDescription ", "")
+                        .split(" ", 2)[1]
+                        .split("-", 2)[1].trim();
+                task.updateTaskDescription(taskUpdate);
+                break;
+            case "/updateTaskName":
+                taskUpdate = text.replace("/updateTaskName ", "")
+                        .split(" ", 2)[1]
+                        .split("-", 2)[1].trim();
+                task.updateTaskName(taskUpdate);
+                break;
+            case "/updateTime":
+                taskUpdate = text.replace("/updateTime ", "")
+                        .split(" ", 2)[1]
+                        .split("-", 2)[1].trim();
+                task.updateTime(taskUpdate);
+                break;
+            case "/setNewTaskDescription":
+                taskUpdate = text.replace("/setNewTaskDescription ", "")
+                        .split(" ", 2)[1]
+                        .split("-", 2)[1].trim();
+                task.setNewTaskDescription(taskUpdate);
+                break;
+        }
+    }
     public TaskStruct findTask(String text, long chatID) {
         String name = text.replace("/find ", "").trim();
         List<TaskStruct> currTask = chatTaskStructsMap.get(chatID);
@@ -227,34 +255,5 @@ public class Bot extends TelegramLongPollingBot {
         return response;
     }
 
-    private void updateTask(String text, TaskStruct task) {
-        String switch_text = text.split(" ", 2)[0], taskUpdate;
-        switch (switch_text){
-            case "/updateTaskDescription":
-                taskUpdate = text.replace("/updateTaskDescription ", "")
-                        .split(" ", 2)[1]
-                        .split("-", 2)[1].trim();
-                task.updateTaskDescription(taskUpdate);
-                break;
-            case "/updateTaskName":
-                taskUpdate = text.replace("/updateTaskName ", "")
-                        .split(" ", 2)[1]
-                        .split("-", 2)[1].trim();
-                task.updateTaskName(taskUpdate);
-                break;
-            case "/updateTime":
-                taskUpdate = text.replace("/updateTime ", "")
-                        .split(" ", 2)[1]
-                        .split("-", 2)[1].trim();
-                task.updateTime(taskUpdate);
-                break;
-            case "/setNewTaskDescription":
-                taskUpdate = text.replace("/setNewTaskDescription ", "")
-                        .split(" ", 2)[1]
-                        .split("-", 2)[1].trim();
-                task.setNewTaskDescription(taskUpdate);
-                break;
-        }
-//        return task;
-    }
+
 }
