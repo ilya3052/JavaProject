@@ -18,7 +18,9 @@ public class TaskStruct {
         this.id = count++;
         TaskStruct.chatId = chatId;
     }
-    public TaskStruct(){}
+    public TaskStruct(){
+        this.taskDescription = this.taskName = this.taskTime = null;
+    }
     public void updateTaskDescription(String additionalText){
         if (this.taskDescription == null)
         {

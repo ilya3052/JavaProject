@@ -37,12 +37,12 @@ public class Bot extends TelegramLongPollingBot {
     private ReplyKeyboardMarkup replyKeyboardMarkup;
     @Override
     public String getBotUsername() {
-        return "TeStTeXt111443242_bot";
+        return "Task_OrganizerBot";
     }
 
     @Override
     public String getBotToken() {
-        return "6776303945:AAG9UnD2lGG8-FSOuIs5ZRudQIQhEoRNRbU";
+        return "6479626601:AAFo02kE2ymnZPO8Z_e9vmmAsK9-N_npnK0";
     }
 
     @Override

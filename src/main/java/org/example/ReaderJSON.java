@@ -20,7 +20,7 @@ public class ReaderJSON {
         try {
         System.out.println(entry.getName());
         ObjectMapper objectMapper = new ObjectMapper();
-        TaskStruct task = new TaskStruct(null, null, null, null);
+        TaskStruct task = new TaskStruct();
         JsonNode rootNode = objectMapper.readTree(entry);
         task.updateTaskName(rootNode.get("Название задачи").asText());
         task.updateTime(rootNode.get("Время").asText());
